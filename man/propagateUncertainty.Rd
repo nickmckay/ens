@@ -38,7 +38,7 @@ propagateUncertainty(
 
 \item{paleo.uncertainty}{Uncertainty to use if modelling uncertainty for paleo values. (default = sd(vals,na.rm = TRUE)/2)}
 
-\item{paleo.ar1}{Autocorrelation coefficient to use for modelling uncertainty on paleoData, what fraction of the uncertainties are autocorrelated? (default = sqrt(0.5); or 50\% autocorrelated uncertainty)}
+\item{paleo.ar1}{Autocorrelation coefficient to use for modelling uncertainty on paleoData, what fraction of the uncertainties are autocorrelated? (default = sqrt(0.5); or 50 percent autocorrelated uncertainty)}
 
 \item{paleo.arima.order}{Order to use for ARIMA model used in modelling uncertainty on paleoData (default = c(1,0,0))}
 

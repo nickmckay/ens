@@ -16,7 +16,7 @@
 #' @param n.ens How many ensembles to use for error propagation? (default = 100)
 #' @param bam.model BAM Model parameters to use if simulating time uncertainty (default = list(ns = n.ens, name = "bernoulli", param = 0.05))
 #' @param paleo.uncertainty Uncertainty to use if modelling uncertainty for paleo values. (default = sd(vals,na.rm = TRUE)/2)
-#' @param paleo.ar1 Autocorrelation coefficient to use for modelling uncertainty on paleoData, what fraction of the uncertainties are autocorrelated? (default = sqrt(0.5); or 50\% autocorrelated uncertainty)
+#' @param paleo.ar1 Autocorrelation coefficient to use for modelling uncertainty on paleoData, what fraction of the uncertainties are autocorrelated? (default = sqrt(0.5); or 50 percent autocorrelated uncertainty)
 #' @param paleo.arima.order Order to use for ARIMA model used in modelling uncertainty on paleoData (default = c(1,0,0))
 #' @param summarize How to summarize the per-ensemble results. FALSE (default) returns every ensemble member. Alternatively, supply a function function(propagated) -> data.frame that collapses the propagated tibble into a summary; this replaces the previous hard-coded, analysis-specific summary so the engine stays generic across analyses.
 #' @param seed set a seed for reproducibility
