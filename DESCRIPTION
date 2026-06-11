@@ -1,0 +1,62 @@
+Package: ens
+Type: Package
+Title: Ensemble Methods for Time-Uncertain Data
+Version: 0.1.0
+Date: 2026-06-10
+Authors@R: c(
+    person("Nicholas", "McKay" ,email = "nick@nau.edu", role = c("aut", "cre"),
+      comment = c(ORCID = "0000-0003-3598-5113")
+    ),
+    person("Julien", "Emile-Geay", role = c("aut"),
+      comment = c(ORCID = "0000-0001-5920-4751")
+    ),
+    person("Deborah", "Khider", role = "aut",
+        comment = c(ORCID = "0000-0001-7501-8430")
+    )
+  )
+Maintainer: Nick McKay <nick@nau.edu>
+Description: Ensemble methods and calculations for time-uncertain
+    paleogeoscientific data, including binning, correlation, regression,
+    principal component analysis, and spectral analysis across age
+    ensembles, plus utilities for extracting and mapping ensembles in
+    LiPD (Linked Paleo Data) objects. Split out of the 'geoChronR'
+    package.
+License: MIT + file LICENSE
+Encoding: UTF-8
+biocViews:
+Imports:
+    astrochron,
+    crayon,
+    dplR,
+    dplyr,
+    glue,
+    lipdR,
+    lomb,
+    magrittr,
+    matrixStats,
+    pbapply,
+    purrr,
+    rEDM (>= 1.15),
+    methods,
+    stats,
+    stringr,
+    tibble,
+    utils
+Suggests:
+    BiocManager,
+    ggplot2,
+    knitr,
+    lipdViz,
+    nuspectral,
+    pcaMethods,
+    ragg,
+    rmarkdown,
+    testthat
+VignetteBuilder: knitr
+URL: https://github.com/nickmckay/ens
+BugReports: https://github.com/nickmckay/ens/issues
+Remotes:
+    nickmckay/lipdR,
+    nickmckay/nuspectral,
+    nickmckay/lipdViz
+RoxygenNote: 7.3.1
