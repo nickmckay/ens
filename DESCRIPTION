@@ -30,6 +30,7 @@ Imports:
     dplR,
     dplyr,
     glue,
+    ks,
     lipdR,
     lomb,
     magrittr,
