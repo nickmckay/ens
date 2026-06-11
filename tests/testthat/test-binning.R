@@ -104,3 +104,17 @@ test_that("corMatrix Monte Carlo p-values are sane", {
   expect_true(all(out$pIsospectral >= 0 & out$pIsospectral <= 1, na.rm = TRUE))
   expect_true(all(out$pIsopersistent >= 0 & out$pIsopersistent <= 1, na.rm = TRUE))
 })
+
+test_that("simulateBam perturbs ages with expected structure", {
+  set.seed(8)
+  t <- seq(0, 1000, by = 10)
+  X <- as.matrix(rnorm(length(t)))
+  out <- simulateBam(X, as.matrix(t),
+                     model = list(ns = 50, name = "poisson",
+                                  param = 0.05, resize = 0),
+                     ageEnsOut = TRUE)
+  expect_true(is.list(out))
+  expect_equal(nrow(out$ageEns), length(t))
+  expect_equal(ncol(out$ageEns), 50)
+  expect_true(all(apply(out$ageEns, 2, function(x) all(diff(x) >= 0))))
+})

@@ -1,7 +1,7 @@
 Package: ens
 Type: Package
 Title: Ensemble Methods for Time-Uncertain Data
-Version: 0.1.0
+Version: 0.2.0
 Date: 2026-06-10
 Authors@R: c(
     person("Nicholas", "McKay" ,email = "nick@nau.edu", role = c("aut", "cre"),
