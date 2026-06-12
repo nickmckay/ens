@@ -477,6 +477,7 @@ computeSpectraEns = function(time,values,max.ens=NA,method='mtm',probs=0.95,gaus
     spec.ens = list(freqs = freq, power = pMat, power.CL = NA)
     
   } else {stop("Unknown method: Valid choices are: 'mtm', 'redfit', 'nuspectral', or 'lomb-scargle' ")}
-  
+
+  class(spec.ens) <- c("spectraEns","list")
   return(spec.ens)
 }

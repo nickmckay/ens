@@ -432,8 +432,8 @@ regressEns = function(time.x,
     regStats = NA
   }
   reg.ens.data=list("m"=m,"b"=b,"regStats"=regStats,"binX"=binX,"binY"=binY,"rX"=rX,"rY"=rY,"modeledY"=modeled.Y.mat,time.x = otx,values.x= ovx,time.y=oty,values.y=ovy,modeled = modeled,yearX = yearX,modeledYear = fullX$time)
-  
-  
+
+  class(reg.ens.data) <- c("regressEns","list")
   return(reg.ens.data)
   
 }
@@ -568,9 +568,10 @@ corEns = function(time.1,
     cor.stats=NA
     corEns.data=list(cor.df = cor.df)
   }
-  
+
+  class(corEns.data) <- c("corEns","list")
   return(corEns.data)
-  
+
 }
 
 

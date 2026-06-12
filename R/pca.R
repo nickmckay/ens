@@ -206,6 +206,7 @@ pcaEns <-  function(bin.list,
 
 names(ens.pc.out) <- c("loadings","PCs","variance","age","meanDataDensity","nullLoadings","nullPCs","nullVariance")
 
+class(ens.pc.out) <- c("pcaEns","list")
 return(ens.pc.out)
 
 }
