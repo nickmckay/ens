@@ -1,0 +1,124 @@
+---
+title: "Extending the ensemble stack"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Extending the ensemble stack}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", dev = "ragg_png")
+```
+
+```{r setup}
+library(ens)
+```
+
+`ens` is the foundation of a family of paleogeoscience packages
+(`lipdViz` for visualization, `geoChronR` for age modeling, `actR` for
+abrupt-change detection, `compositeR` for record compositing). This
+vignette describes two shared conventions that keep the family modular
+and make it easy to add new methods that reuse existing infrastructure.
+
+## 1. The ensemble-propagation engine
+
+Most time-uncertain analyses follow the same skeleton: take a record,
+generate an ensemble that represents its age and/or value uncertainty,
+run an analysis on each ensemble member, and (optionally) test the
+result against surrogates. `ens` provides that skeleton so you only have
+to write the analysis itself.
+
+### The `changeFun` contract
+
+Write a function that takes a single `time` vector and `vals` vector
+(plus any parameters) and returns **a one-row data frame**:
+
+```{r}
+# detect whether the second half of a record differs from the first
+meanShiftFrac <- function(time, vals, split = median(time)) {
+  pre  <- vals[time <  split]
+  post <- vals[time >= split]
+  tibble::tibble(delta = mean(post, na.rm = TRUE) - mean(pre, na.rm = TRUE))
+}
+```
+
+Any function with this shape automatically gains:
+
+- **uncertainty propagation** via `propagateUncertainty()`, which maps it
+  across an ensemble (simulating age uncertainty with `simulateBam()` and
+  value uncertainty with `simulateAutoCorrelatedUncertainty()` when an
+  ensemble is not supplied), and
+- **null-hypothesis testing** via `testNullHypothesis()`, which runs the
+  same function on surrogate series.
+
+```{r}
+set.seed(1)
+time <- seq(0, 1000, by = 10)
+vals <- rnorm(length(time)) + ifelse(time > 500, 1.5, 0)  # a shift at 500
+
+# propagate uncertainty: one row per ensemble member
+ens_out <- propagateUncertainty(time, vals,
+                                changeFun = meanShiftFrac,
+                                n.ens = 50,
+                                progress = FALSE)
+quantile(ens_out$delta, c(0.025, 0.5, 0.975))
+```
+
+### Summaries are caller-supplied
+
+`propagateUncertainty()` returns every ensemble member by default. To
+collapse the ensemble, pass a *function* describing how to summarize your
+own output -- the engine stays agnostic to what your `changeFun` returns:
+
+```{r}
+propagateUncertainty(time, vals, changeFun = meanShiftFrac, n.ens = 50,
+                     progress = FALSE,
+                     summarize = function(p) {
+                       tibble::tibble(median_delta = median(p$delta),
+                                      frac_positive = mean(p$delta > 0))
+                     })
+```
+
+### Significance from surrogates
+
+`testNullHypothesis()` runs the analysis on surrogates that preserve the
+record's statistical properties but destroy its signal, and `kdePval()`
+turns the resulting null distribution into a p-value:
+
+```{r}
+nulls <- testNullHypothesis(time, vals, changeFun = meanShiftFrac,
+                            n.ens = 20, mc.ens = 20,
+                            surrogate.method = "isospectral",
+                            progress = FALSE)
+null_deltas <- vapply(nulls, function(x) median(x$delta), numeric(1))
+observed <- median(ens_out$delta)
+kdePval(null_deltas, observed)$pval
+```
+
+That is the entire pattern `actR` uses for excursion and shift
+detection: each detector is just a `changeFun`.
+
+## 2. The two-layer result convention
+
+Across the family, results follow a deliberate two-layer split:
+
+- **Inside**, heavy numerics stay plain matrices and vectors -- fast,
+  memory-light, and easy to compute on.
+- **Outside**, user-facing results carry an S3 class with
+  `print`/`plot`/`summary` methods, and use a small set of standardized
+  component names so functions compose across packages.
+
+The container follows the shape of the data:
+
+| Result shape | Container | Example |
+|---|---|---|
+| One row per record/ensemble member (row-composable) | classed **tibble** with list-columns | `actR`'s `excursion`/`shift` |
+| Matrix-shaped (bins x ensemble) | classed **list** of matrices | `compositeR`'s `paleoComposite` |
+
+Shared component names — `time`, `values`, `ensemble`, `parameters`,
+`metadata` — let a result from one package flow into a plotting or
+analysis function in another without translation. When you add a new
+method, return matrices internally, attach a class for display, and reuse
+these names so the rest of the stack already knows how to handle it.
+```
