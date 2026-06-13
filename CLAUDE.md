@@ -1,10 +1,10 @@
 # CLAUDE.md — ens
 
-`ens` is the **foundation** of a five-package paleogeoscience family (split out of the
+`ens` is the **foundation** of a six-package paleogeoscience family (split out of the
 monolithic geoChronR in June 2026). It holds the ensemble methods and the shared
 uncertainty-propagation / null-hypothesis engine that the rest of the family builds on.
 
-## Package family (dependency DAG: ens ← lipdViz ← geoChronR; actR & compositeR on top)
+## Package family (dependency DAG: ens ← lipdViz ← geoChronR; actR, compositeR & fluxcapacitoR on top)
 
 | Repo (`~/GitHub/...`) | GitHub | Branch | Role |
 |---|---|---|---|
@@ -13,6 +13,7 @@ uncertainty-propagation / null-hypothesis engine that the rest of the family bui
 | geoChronR-chronOnly | nickmckay/geoChronR-chronOnly | main | geoChronR 2.0: age modeling; re-exports ens+lipdViz |
 | actR | **LinkedEarth/actR** | refactor | Abrupt-change detection on the ens engine |
 | compositeR | nickmckay/compositeR | refactor | Record compositing on ens/lipdViz |
+| fluxcapacitoR | nickmckay/fluxcapacitoR | main | Flux-focused varve age modeling (loosely coupled; Suggests ens+lipdViz) |
 
 ## What lives here
 
