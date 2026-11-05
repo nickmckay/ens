@@ -4,15 +4,16 @@
 monolithic geoChronR in June 2026). It holds the ensemble methods and the shared
 uncertainty-propagation / null-hypothesis engine that the rest of the family builds on.
 
-## Package family (dependency DAG: ens ← lipdViz ← geoChronR; actR, compositeR & fluxcapacitoR on top)
+## Package family (dependency DAG: ens ← lipdViz ← agemodelR ← geoChronR; actR, compositeR & fluxcapacitoR on top)
 
 | Repo (`~/GitHub/...`) | GitHub | Branch | Role |
 |---|---|---|---|
 | **ens** (this repo) | nickmckay/ens | main | Ensemble methods + UQ engine |
 | lipdViz | nickmckay/lipdViz | main | Plotting + mapping; imports ens |
-| geoChronR-chronOnly | nickmckay/geoChronR-chronOnly | main | geoChronR 2.0: age modeling; re-exports ens+lipdViz |
-| actR | **LinkedEarth/actR** | refactor | Abrupt-change detection on the ens engine |
-| compositeR | nickmckay/compositeR | refactor | Record compositing on ens/lipdViz |
+| agemodelR | nickmckay/agemodelR | main | Age modeling (Bacon, Bchron, OxCal, BAM) |
+| GeoChronR | nickmckay/GeoChronR | master | geoChronR 2.0: wrapper re-exporting agemodelR, ens and lipdViz |
+| actR | **LinkedEarth/actR** | main | Abrupt-change detection on the ens engine |
+| compositeR | nickmckay/compositeR | master | Record compositing on ens/lipdViz |
 | fluxcapacitoR | nickmckay/fluxcapacitoR | main | Flux-focused varve age modeling (loosely coupled; Suggests ens+lipdViz) |
 
 ## What lives here
@@ -44,5 +45,5 @@ uncertainty-propagation / null-hypothesis engine that the rest of the family bui
 ## Dev
 
 `devtools::load_all()` · `devtools::document()` · `devtools::test()` · `devtools::check()`.
-After changing exports, regenerate geoChronR's re-exports (`geoChronR-chronOnly/tools/gen_reexports.R`).
+After changing exports, regenerate geoChronR's re-exports (`GeoChronR/tools/gen_reexports.R`).
 Commit work when complete. Co-author trailer: `Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>`.
