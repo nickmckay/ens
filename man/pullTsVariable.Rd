@@ -7,7 +7,7 @@
 pullTsVariable(TS, variable)
 }
 \arguments{
-\item{TS}{LiPD timeseries object See \url{http://nickmckay.github.io/LiPD-utilities/r/index.html#what-is-a-time-series}}
+\item{TS}{LiPD timeseries object (a TS list from lipdR::extractTs(), or a timeseries tibble from lipdR::ts2tibble())}
 
 \item{variable}{the name of variable in a TS object}
 }
@@ -15,7 +15,7 @@ pullTsVariable(TS, variable)
 a vector of the values, with NA representing instances without this variable.
 }
 \description{
-pulls all instances of a single variable out of a TS
+pulls all instances of a single variable out of a TS list or timeseries tibble
 }
 \seealso{
 Other LiPD manipulation: 
