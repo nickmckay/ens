@@ -689,11 +689,12 @@ bin = function(time,values,bin.vec,bin.fun = mean){
 #' @title Bin every entry in a Timeseries object
 #' @description Aggregate data from a timeseries object into the same timeline through binning. 
 #'
-#' @param TS LiPD timeseries object See \url{http://nickmckay.github.io/LiPD-utilities/r/index.html#what-is-a-time-series}
+#' @param TS LiPD timeseries object (a TS list from lipdR::extractTs(), or a timeseries tibble from lipdR::ts2tibble())
 #' @param bin.vec vector of bin edges for describing where to bin
 #' @param bin.fun function to use during binning (mean, sd, and sum all work)
 #' @param max.ens Maximum number of ensemble members.
-#' @param time.var specify the time variable to bin (default = "ageEnsemble")
+#' @param time.var specify the time variable to bin (default = "ageEnsemble"). "time" uses each record's age ensemble if it has one, and otherwise its time axis, all converted to `time.units` with [lipdR::getTsTime()], so records in year CE and yr BP can be binned together.
+#' @param time.units the time scale to bin on when time.var = "time" (default = "yr BP"). bin.vec is in these units.
 #' @param na.col.rm Remove columns that are all NAs? (TRUE or FALSE)
 #'
 #' @author Nick McKay
@@ -701,22 +702,26 @@ bin = function(time,values,bin.vec,bin.fun = mean){
 binTs = function(TS,
                  time.var="ageEnsemble",
                  bin.vec,
+                 time.units = "yr BP",
                  bin.fun = mean,
                  max.ens=1000,
                  na.col.rm=TRUE){
   
-  #check to see if TS is a tibble
-  if(tibble::is_tibble(TS)){#convert back to TS
-    TS <- lipdR::untidyTs(TS)
+  #a timeseries tibble or data frame works too
+  if(is.data.frame(TS)){
+    TS <- lipdR::as.lipdTs(TS)
   }
-  
-  
-  #check for time.var
-  
-  
-  
-  
-  timeList = lapply(TS,"[[",time.var)
+
+  #time.var = "time": each record's time axis (or age ensemble), on the time.units scale
+  if(identical(time.var, "time")){
+    timeList <- lapply(TS, function(ts){
+      tm <- lipdR::getTsTime(ts, units = time.units, ensemble = TRUE)
+      attr(tm, "timeUnits") <- NULL
+      tm
+    })
+  }else{
+    timeList = lapply(TS,"[[",time.var)
+  }
   valueList = lapply(TS,"[[","paleoData_values")
   
   

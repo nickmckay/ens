@@ -8,17 +8,20 @@ binTs(
   TS,
   time.var = "ageEnsemble",
   bin.vec,
+  time.units = "yr BP",
   bin.fun = mean,
   max.ens = 1000,
   na.col.rm = TRUE
 )
 }
 \arguments{
-\item{TS}{LiPD timeseries object See \url{http://nickmckay.github.io/LiPD-utilities/r/index.html#what-is-a-time-series}}
+\item{TS}{LiPD timeseries object (a TS list from lipdR::extractTs(), or a timeseries tibble from lipdR::ts2tibble())}
 
-\item{time.var}{specify the time variable to bin (default = "ageEnsemble")}
+\item{time.var}{specify the time variable to bin (default = "ageEnsemble"). "time" uses each record's age ensemble if it has one, and otherwise its time axis, all converted to `time.units` with [lipdR::getTsTime()], so records in year CE and yr BP can be binned together.}
 
 \item{bin.vec}{vector of bin edges for describing where to bin}
+
+\item{time.units}{the time scale to bin on when time.var = "time" (default = "yr BP"). bin.vec is in these units.}
 
 \item{bin.fun}{function to use during binning (mean, sd, and sum all work)}
 

@@ -10,15 +10,15 @@ createTSid <- function(){
 #' @export
 #' @family LiPD manipulation
 #' @title pull variable out of TS object
-#' @description pulls all instances of a single variable out of a TS
+#' @description pulls all instances of a single variable out of a TS list or timeseries tibble
 #' @inheritParams binTs
 #' @param variable the name of variable in a TS object
 #' @return a vector of the values, with NA representing instances without this variable.
 pullTsVariable = function(TS,variable){
   
-  #check to see if TS is a tibble
-  if(tibble::is_tibble(TS)){#convert back to TS
-    stop("This looks like a 'tidyTs', so you can just extract your variables with `var <- TS$varName`")
+  #a timeseries tibble or data frame works too
+  if(is.data.frame(TS)){
+    TS <- lipdR::as.lipdTs(TS)
   }
   
   allNames <- unique(unlist(sapply(TS,names)))
