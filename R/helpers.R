@@ -26,8 +26,15 @@ loadRemote <- function(url,useSavedNames = FALSE){
 #' @param range.min What's the smallest range that you'd believe is yr not ka? (default = 25)
 #' @param X A LiPD variable list or a vector of years BP 
 #'
-#' @return A *guessed* string unit label
+#' @return A string unit label: the variable's own time scale if it carries one (lipdR >= 0.8.0 adds these when reading), and otherwise a *guess*
+#' @details If `X` is a variable list with a time scale (`timeUnits`, `timeDatum`, `timeDirection`, `timeExponent`) that wasn't itself assumed, its `timeUnits` is returned and nothing is guessed.
 heuristicUnits = function(X,range.min = 25){
+  if(is.list(X) && !is.null(X$timeUnits) && !identical(X$timeSource, "assumed")){
+    scale <- variableTimeScale(X)
+    if(!is.null(scale)){
+      return(scale$timeUnits)
+    }
+  }
   if(is.list(X)){
     if(all(is.na(X$values))){
       return(NA)

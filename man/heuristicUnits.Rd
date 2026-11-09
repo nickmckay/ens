@@ -12,10 +12,13 @@ heuristicUnits(X, range.min = 25)
 \item{range.min}{What's the smallest range that you'd believe is yr not ka? (default = 25)}
 }
 \value{
-A *guessed* string unit label
+A string unit label: the variable's own time scale if it carries one (lipdR >= 0.8.0 adds these when reading), and otherwise a *guess*
 }
 \description{
 Guesses year units based on some simple heuristics
+}
+\details{
+If `X` is a variable list with a time scale (`timeUnits`, `timeDatum`, `timeDirection`, `timeExponent`) that wasn't itself assumed, its `timeUnits` is returned and nothing is guessed.
 }
 \seealso{
 Other utility: 

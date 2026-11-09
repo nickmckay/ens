@@ -21,12 +21,21 @@ pullTsVariable = function(TS,variable){
     TS <- lipdR::as.lipdTs(TS)
   }
   
-  allNames <- unique(unlist(sapply(TS,names)))
+  allNames <- unique(unlist(lapply(TS,names)))
   
   #test for exact match
   which.var <- which(variable == allNames)
   if(length(which.var) == 0){#try a fuzzier search
     which.var <- which(grepl(pattern = variable,x = allNames,ignore.case = TRUE))
+    if(length(which.var) > 1){#prefer the data column's own field, e.g. paleoData_variableName over timeVariableName
+      for(pre in c("paleoData_", "chronData_")){
+        prefixed <- which.var[tolower(allNames[which.var]) == tolower(paste0(pre, variable))]
+        if(length(prefixed) == 1){
+          which.var <- prefixed
+          break
+        }
+      }
+    }
     if(length(which.var) == 1){#
       warning(paste0("Couldn't find exact match for '",variable,"', using ",allNames[which.var]," instead."))
     }else if(length(which.var) == 0){
@@ -338,6 +347,9 @@ mapAgeEnsembleToPaleoData = function(L,
   L$paleoData[[paleo.num]]$measurementTable[[paleo.meas.table.num]][[ensAll$variableName]]$TSid = lipdR::createTSid("ens")
   
   L$paleoData[[paleo.num]]$measurementTable[[paleo.meas.table.num]][[ensAll$variableName]]$description = paste("age ensemble pulled from chronData", chron.num,"model",model.num,"- fit to paleoData depth with linear interpolation")
+  #carry the chron ensemble's time scale
+  L$paleoData[[paleo.num]]$measurementTable[[paleo.meas.table.num]][[ensAll$variableName]] <-
+    copyTimeScale(L$paleoData[[paleo.num]]$measurementTable[[paleo.meas.table.num]][[ensAll$variableName]], ensAll)
   
   print(glue::glue("mapAgeEnsembleToPaleoData created new variable {ensAll$variableName} in paleo {paleo.num} measurement table {paleo.meas.table.num}"))
   
@@ -362,6 +374,8 @@ mapAgeEnsembleToPaleoData = function(L,
     L$paleoData[[paleo.num]]$measurementTable[[paleo.meas.table.num]][[medianVar]]$fromChronData = chron.num
     L$paleoData[[paleo.num]]$measurementTable[[paleo.meas.table.num]][[medianVar]]$frommodel = model.num
     L$paleoData[[paleo.num]]$measurementTable[[paleo.meas.table.num]][[medianVar]]$TSid = lipdR::createTSid("ens")
+    L$paleoData[[paleo.num]]$measurementTable[[paleo.meas.table.num]][[medianVar]] <-
+      copyTimeScale(L$paleoData[[paleo.num]]$measurementTable[[paleo.meas.table.num]][[medianVar]], ensAll)
     print(glue::glue("mapAgeEnsembleToPaleoData also created new variable {medianVar} in paleo {paleo.num} measurement table {paleo.meas.table.num}"))
     
   }
@@ -634,6 +648,10 @@ getVariableIndex = function(table,
 #' }
 #' @author Nick McKay
 alignTimeseriesBin = function(time.1,values.1,time.2,values.2,bin.vec = NA,bin.step = NA ,bin.fun=mean,max.ens=NA,min.obs=10){
+  #put time.2 on time.1's time scale, if both carry one
+  matched <- matchTimeScales(time.1, time.2)
+  time.1 <- matched[[1]]
+  time.2 <- matched[[2]]
   #check to see if time and values are "column lists"
   if(is.list(time.1)){
     otx=time.1
