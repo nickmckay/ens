@@ -8,29 +8,32 @@ binTs(
   TS,
   time.var = "ageEnsemble",
   bin.vec,
-  time.units = "yr BP",
+  time.units = NULL,
   bin.fun = mean,
   max.ens = 1000,
-  na.col.rm = TRUE
+  na.col.rm = TRUE,
+  time.variable = NULL
 )
 }
 \arguments{
 \item{TS}{LiPD timeseries object (a TS list from lipdR::extractTs(), or a timeseries tibble from lipdR::ts2tibble())}
 
-\item{time.var}{specify the time variable to bin (default = "ageEnsemble"). "time" uses each record's age ensemble if it has one, and otherwise its time axis, all converted to `time.units` with [lipdR::getTsTime()], so records in year CE and yr BP can be binned together.}
+\item{time.var}{specify the time variable to bin (default = "ageEnsemble"), used as is, without conversion. "time" uses each record's age ensemble if it has one, and otherwise its time axis, all converted to `time.units` with [lipdR::getTsTimes()], so records in year CE and yr BP can be binned together.}
 
 \item{bin.vec}{vector of bin edges for describing where to bin}
 
-\item{time.units}{the time scale to bin on when time.var = "time" (default = "yr BP"). bin.vec is in these units.}
+\item{time.units}{the time scale to bin on when converting (time.var = "time", or time.variable given). bin.vec is in these units. NULL (default) uses the records' own scale if they all share one, and yr BP otherwise ([lipdR::commonTimeUnits()]).}
 
 \item{bin.fun}{function to use during binning (mean, sd, and sum all work)}
 
 \item{max.ens}{Maximum number of ensemble members.}
 
 \item{na.col.rm}{Remove columns that are all NAs? (TRUE or FALSE)}
+
+\item{time.variable}{the time variable to convert and bin, by name (e.g. "time", "age", "year", "calAge"; see [lipdR::tsTimeVariables()]). When given, it is used instead of `time.var`, converted to `time.units`; an "age" or "year" ensemble is used when there is one.}
 }
 \value{
-A list of binned years and values.
+A list of binned years and values, with a "timeUnits" attribute when time was converted.
 }
 \description{
 Aggregate data from a timeseries object into the same timeline through binning.

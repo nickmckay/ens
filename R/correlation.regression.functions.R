@@ -339,6 +339,11 @@ regressEns = function(time.x,
     stop("time.x, time.y, values.x and values.y must all be ``variable lists'' (output of selectData)")
   }
   
+  #put time.y on time.x's time scale, if both carry one
+  matched <- matchTimeScales(time.x, time.y, names = c("time.x", "time.y"))
+  time.x <- matched[[1]]
+  time.y <- matched[[2]]
+
   otx=time.x
   oty=time.y
   ovx=values.x
@@ -479,6 +484,12 @@ corEns = function(time.1,
                   gaussianize = TRUE,
                   ...){
   
+  #put time.2 on time.1's time scale, if both carry one
+  matched <- matchTimeScales(time.1, time.2)
+  time.1 <- matched[[1]]
+  time.2 <- matched[[2]]
+  timeScale1 <- variableTimeScale(time.1)
+
   #check to see if time and values are "column lists"
   if(is.list(time.1)){time.1=time.1$values}
   if(is.list(time.2)){time.2=time.2$values}
@@ -569,6 +580,9 @@ corEns = function(time.1,
     corEns.data=list(cor.df = cor.df)
   }
 
+  if(!is.null(timeScale1)){
+    corEns.data$timeUnits <- timeScale1$timeUnits
+  }
   class(corEns.data) <- c("corEns","list")
   return(corEns.data)
 
@@ -588,6 +602,10 @@ corEns = function(time.1,
 
 binEns = function(time,values,bin.vec,bin.fun=mean,max.ens=NA){
   
+  #variable lists (selectData output) work too
+  timeScale0 <- variableTimeScale(time)
+  if(is.list(time) && !is.data.frame(time)){time = time$values}
+  if(is.list(values) && !is.data.frame(values)){values = values$values}
   time = as.matrix(time)
   values = as.matrix(values)
   
@@ -633,6 +651,9 @@ binEns = function(time,values,bin.vec,bin.fun=mean,max.ens=NA){
   binMat = as.matrix(binMat)
   bin_x = (bin.vec[-1] + bin.vec[-length(bin.vec)]) / 2
   binned=list("time"=bin_x,"matrix" = binMat)
+  if(!is.null(timeScale0)){
+    binned$timeUnits <- timeScale0$timeUnits
+  }
   return(binned)
   
 }
@@ -693,32 +714,39 @@ bin = function(time,values,bin.vec,bin.fun = mean){
 #' @param bin.vec vector of bin edges for describing where to bin
 #' @param bin.fun function to use during binning (mean, sd, and sum all work)
 #' @param max.ens Maximum number of ensemble members.
-#' @param time.var specify the time variable to bin (default = "ageEnsemble"). "time" uses each record's age ensemble if it has one, and otherwise its time axis, all converted to `time.units` with [lipdR::getTsTime()], so records in year CE and yr BP can be binned together.
-#' @param time.units the time scale to bin on when time.var = "time" (default = "yr BP"). bin.vec is in these units.
+#' @param time.var specify the time variable to bin (default = "ageEnsemble"), used as is, without conversion. "time" uses each record's age ensemble if it has one, and otherwise its time axis, all converted to `time.units` with [lipdR::getTsTimes()], so records in year CE and yr BP can be binned together.
+#' @param time.variable the time variable to convert and bin, by name (e.g. "time", "age", "year", "calAge"; see [lipdR::tsTimeVariables()]). When given, it is used instead of `time.var`, converted to `time.units`; an "age" or "year" ensemble is used when there is one.
+#' @param time.units the time scale to bin on when converting (time.var = "time", or time.variable given). bin.vec is in these units. NULL (default) uses the records' own scale if they all share one, and yr BP otherwise ([lipdR::commonTimeUnits()]).
 #' @param na.col.rm Remove columns that are all NAs? (TRUE or FALSE)
 #'
 #' @author Nick McKay
-#' @return A list of binned years and values.
+#' @return A list of binned years and values, with a "timeUnits" attribute when time was converted.
 binTs = function(TS,
                  time.var="ageEnsemble",
                  bin.vec,
-                 time.units = "yr BP",
+                 time.units = NULL,
                  bin.fun = mean,
                  max.ens=1000,
-                 na.col.rm=TRUE){
+                 na.col.rm=TRUE,
+                 time.variable = NULL){
   
   #a timeseries tibble or data frame works too
   if(is.data.frame(TS)){
     TS <- lipdR::as.lipdTs(TS)
   }
 
-  #time.var = "time": each record's time axis (or age ensemble), on the time.units scale
-  if(identical(time.var, "time")){
-    timeList <- lapply(TS, function(ts){
-      tm <- lipdR::getTsTime(ts, units = time.units, ensemble = TRUE)
-      attr(tm, "timeUnits") <- NULL
-      tm
-    })
+  #convert the time axis (time.var = "time", or a named time.variable) to one scale
+  convert <- !is.null(time.variable) || identical(time.var, "time")
+  if(convert){
+    variable <- time.variable %||% "time"
+    if(is.null(time.units)){
+      time.units <- lipdR::commonTimeUnits(TS, variable = variable, ensemble = TRUE)
+      message("Binning on ", time.units, " (bin.vec is in these units).")
+    }
+    timeList <- lipdR::getTsTimes(TS, units = time.units, variable = variable, ensemble = TRUE, missing = "quiet")
+    attr(timeList, "timeUnits") <- NULL
+    timeList <- lapply(timeList, function(tm){ if(!is.null(tm)) attributes(tm)[c("timeUnits", "timeVariableName", "timeSource")] <- NULL; tm })
+    time.var <- variable
   }else{
     timeList = lapply(TS,"[[",time.var)
   }
@@ -755,6 +783,9 @@ binTs = function(TS,
     setTxtProgressBar(pb,i)
   }
   close(pb)
+  if(convert){
+    attr(binMat, "timeUnits") <- lipdR::timeScale(time.units)$timeUnits
+  }
   return(binMat)  
   
 }
