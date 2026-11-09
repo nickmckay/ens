@@ -79,3 +79,10 @@ test_that("mapAgeEnsembleToPaleoData carries the chron ensemble's time scale", {
   expect_equal(col$timeSource, "metadata")
   expect_equal(L2$paleoData[[1]]$measurementTable[[1]]$ageMedian$timeUnits, "yr BP")
 })
+
+test_that("pullTsVariable prefers the paleoData_ field among near matches", {
+  TS <- list(list(paleoData_variableName = "d18O", timeVariableName = "age", paleoData_values = 1),
+             list(paleoData_variableName = "Mg/Ca", timeVariableName = "age", paleoData_values = 2))
+  expect_warning(v <- pullTsVariable(TS, "variableName"), "paleoData_variableName")
+  expect_equal(v, c("d18O", "Mg/Ca"))
+})

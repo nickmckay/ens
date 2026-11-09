@@ -21,12 +21,21 @@ pullTsVariable = function(TS,variable){
     TS <- lipdR::as.lipdTs(TS)
   }
   
-  allNames <- unique(unlist(sapply(TS,names)))
+  allNames <- unique(unlist(lapply(TS,names)))
   
   #test for exact match
   which.var <- which(variable == allNames)
   if(length(which.var) == 0){#try a fuzzier search
     which.var <- which(grepl(pattern = variable,x = allNames,ignore.case = TRUE))
+    if(length(which.var) > 1){#prefer the data column's own field, e.g. paleoData_variableName over timeVariableName
+      for(pre in c("paleoData_", "chronData_")){
+        prefixed <- which.var[tolower(allNames[which.var]) == tolower(paste0(pre, variable))]
+        if(length(prefixed) == 1){
+          which.var <- prefixed
+          break
+        }
+      }
+    }
     if(length(which.var) == 1){#
       warning(paste0("Couldn't find exact match for '",variable,"', using ",allNames[which.var]," instead."))
     }else if(length(which.var) == 0){
