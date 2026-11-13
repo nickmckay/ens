@@ -1,3 +1,7 @@
+# ens 0.3.1
+
+* Requires lipdR 0.8.4 or later, which includes the `pullTsVariable()` fix from 0.8.3 and `filterByInterpretation()`.
+
 # ens 0.3.0
 
 Uses the time scales lipdR (>= 0.8.1) puts on every time column, so time axes are converted, not guessed.

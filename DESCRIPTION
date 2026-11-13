@@ -1,7 +1,7 @@
 Package: ens
 Type: Package
 Title: Ensemble Methods for Time-Uncertain Data
-Version: 0.3.0
+Version: 0.3.1
 Date: 2026-06-10
 Authors@R: c(
     person("Nicholas", "McKay" ,email = "nick@nau.edu", role = c("aut", "cre"),
@@ -31,7 +31,7 @@ Imports:
     dplyr,
     glue,
     ks,
-    lipdR (>= 0.8.1),
+    lipdR (>= 0.8.4),
     lomb,
     magrittr,
     matrixStats,
